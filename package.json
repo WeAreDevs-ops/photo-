@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "scripts": {
+  "install": "npm install --platform=linux --arch=x64 sharp",
+  "start": "node server.js"
+    }
   },
   "dependencies": {
     "express": "^4.18.2",
