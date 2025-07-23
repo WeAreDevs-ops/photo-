@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Time In/Out Collage</title>
+</head>
+<body>
+  <h2>Upload Time In/Out Photos</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <label>Time In Photo: <input type="file" name="inPhoto" required></label><br>
+    <label>Time Out Photo: <input type="file" name="outPhoto" required></label><br><br>
+    <button type="submit">Generate Collage</button>
+  </form>
+  <br>
+  <img id="result" style="max-width: 1000px;" />
+  <script>
+    document.getElementById('uploadForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const res = await fetch('/upload', {
+        method: 'POST',
+        body: formData
+      });
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      document.getElementById('result').src = url;
+    }
+  </script>
+</body>
+</html>
