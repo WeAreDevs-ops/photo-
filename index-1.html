@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time In/Out Tracker</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #2d5016 0%, #4a7c59 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #2d5016 0%, #7fb069 100%);
+      padding: 40px;
+      text-align: center;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 300;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .form-section {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      color: #2d5016;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #7fb069;
+    }
+
+    .template-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .template-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #f9f9f9;
+    }
+
+    .template-card:hover {
+      border-color: #7fb069;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    .template-card.selected {
+      border-color: #7fb069;
+      background: #f0f7ed;
+      box-shadow: 0 10px 20px rgba(127, 176, 105, 0.2);
+    }
+
+    .template-preview {
+      width: 100%;
+      height: 120px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: white;
+      font-weight: bold;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .template-preview.forest {
+      background: linear-gradient(135deg, #2d5016 0%, #7fb069 100%);
+    }
+
+    .template-preview.ocean {
+      background: linear-gradient(135deg, #0077be 0%, #2a9d8f 100%);
+    }
+
+    .template-preview.sunset {
+      background: linear-gradient(135deg, #8b5a2b 0%, #f2cc8f 100%);
+    }
+
+    .template-preview.meadow {
+      background: linear-gradient(135deg, #606c38 0%, #dda15e 100%);
+    }
+
+    .time-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .time-group {
+      text-align: center;
+    }
+
+    .time-label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #2d5016;
+    }
+
+    .time-input {
+      width: 100%;
+      padding: 15px;
+      font-size: 1.2rem;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      text-align: center;
+      transition: border-color 0.3s ease;
+    }
+
+    .time-input:focus {
+      outline: none;
+      border-color: #7fb069;
+    }
+
+    .upload-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .upload-box {
+      border: 2px dashed #7fb069;
+      border-radius: 15px;
+      padding: 40px 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: #f0f7ed;
+    }
+
+    .upload-box:hover {
+      border-color: #2d5016;
+      background: #e8f5e5;
+    }
+
+    .upload-box.dragover {
+      border-color: #4caf50;
+      background: #e8f5e8;
+    }
+
+    .upload-input {
+      display: none;
+    }
+
+    .upload-label {
+      cursor: pointer;
+      display: block;
+    }
+
+    .upload-icon {
+      font-size: 3rem;
+      color: #7fb069;
+      margin-bottom: 15px;
+    }
+
+    .upload-text {
+      color: #2d5016;
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .upload-hint {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .image-preview {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 10px;
+      margin-top: 15px;
+    }
+
+    .generate-btn {
+      background: linear-gradient(135deg, #2d5016 0%, #7fb069 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.2rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 0 auto;
+      box-shadow: 0 5px 15px rgba(45, 80, 22, 0.3);
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(45, 80, 22, 0.4);
+    }
+
+    .generate-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-section {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .result-image {
+      max-width: 100%;
+      border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, #4a7c59 0%, #a3b18a 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .download-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(74, 124, 89, 0.3);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #7fb069;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .upload-section, .time-inputs {
+        grid-template-columns: 1fr;
+      }
+
+      .header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📸 Time In/Out Tracker</h1>
+      <p>Create beautiful attendance photos with professional nature-inspired templates</p>
+    </div>
+
+    <div class="content">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="form-section">
+          <h2 class="section-title">🎨 Choose Template Style</h2>
+          <div style="margin-bottom: 20px;">
+            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+              <input type="radio" name="templateMode" value="overlay" checked style="width: 20px; height: 20px;">
+              <span>Photo Overlay (text on photos)</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 10px;">
+              <input type="radio" name="templateMode" value="background" style="width: 20px; height: 20px;">
+              <span>Background Template (text outside photos)</span>
+            </label>
+          </div>
+          <div class="template-grid">
+            <div class="template-card selected" data-template="forest">
+              <div class="template-preview forest">
+                <div>🌲 Forest Green</div>
+              </div>
+              <h3>Forest Green</h3>
+              <p>Natural and calming forest vibes</p>
+            </div>
+
+            <div class="template-card" data-template="ocean">
+              <div class="template-preview ocean">
+                <div>🌊 Ocean Blue</div>
+              </div>
+              <h3>Ocean Blue</h3>
+              <p>Fresh ocean breeze feeling</p>
+            </div>
+
+            <div class="template-card" data-template="sunset">
+              <div class="template-preview sunset">
+                <div>🌅 Golden Sunset</div>
+              </div>
+              <h3>Golden Sunset</h3>
+              <p>Warm and cozy sunset colors</p>
+            </div>
+
+            <div class="template-card" data-template="meadow">
+              <div class="template-preview meadow">
+                <div>🌿 Earth Meadow</div>
+              </div>
+              <h3>Earth Meadow</h3>
+              <p>Grounded and natural earth tones</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 class="section-title">⏰ Set Your Times</h2>
+          <div class="time-inputs">
+            <div class="time-group">
+              <label class="time-label">Time In</label>
+              <input type="time" id="inTime" name="inTime" class="time-input" value="09:00" required>
+            </div>
+            <div class="time-group">
+              <label class="time-label">Time Out</label>
+              <input type="time" id="outTime" name="outTime" class="time-input" value="17:00" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h2 class="section-title">📷 Upload Your Photos</h2>
+          <div class="upload-section">
+            <div class="upload-box" id="inPhotoBox">
+              <label for="inPhoto" class="upload-label">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">Time IN Photo</div>
+                <div class="upload-hint">Click to upload or drag & drop</div>
+              </label>
+              <input type="file" id="inPhoto" name="inPhoto" class="upload-input" accept="image/*" required>
+              <img id="inPreview" class="image-preview" style="display: none;">
+            </div>
+
+            <div class="upload-box" id="outPhotoBox">
+              <label for="outPhoto" class="upload-label">
+                <div class="upload-icon">📸</div>
+                <div class="upload-text">Time OUT Photo</div>
+                <div class="upload-hint">Click to upload or drag & drop</div>
+              </label>
+              <input type="file" id="outPhoto" name="outPhoto" class="upload-input" accept="image/*" required>
+              <img id="outPreview" class="image-preview" style="display: none;">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="generate-btn">✨ Create Time Tracker Photo</button>
+      </form>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Creating your time tracker photo...</p>
+      </div>
+
+      <div class="result-section">
+        <img id="result" class="result-image" style="display: none;" />
+        <div id="downloadSection" style="display: none;">
+          <a id="downloadBtn" class="download-btn" download="time-tracker.png">📥 Download Photo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let selectedTemplate = 'forest';
+
+    // Template selection
+    document.querySelectorAll('.template-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedTemplate = card.dataset.template;
+      });
+    });
+
+    // Format time for display
+    function formatTime(timeValue) {
+      const [hours, minutes] = timeValue.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const displayHour = hour % 12 || 12;
+      return `${displayHour}:${minutes} ${ampm}`;
+    }
+
+    // File upload handling with drag & drop
+    function setupFileUpload(inputId, previewId, boxId) {
+      const input = document.getElementById(inputId);
+      const preview = document.getElementById(previewId);
+      const box = document.getElementById(boxId);
+
+      input.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Drag & drop functionality
+      box.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        box.classList.add('dragover');
+      });
+
+      box.addEventListener('dragleave', () => {
+        box.classList.remove('dragover');
+      });
+
+      box.addEventListener('drop', (e) => {
+        e.preventDefault();
+        box.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          input.files = files;
+          input.dispatchEvent(new Event('change'));
+        }
+      });
+    }
+
+    setupFileUpload('inPhoto', 'inPreview', 'inPhotoBox');
+    setupFileUpload('outPhoto', 'outPreview', 'outPhotoBox');
+
+    // Form submission
+    document.getElementById('uploadForm').onsubmit = async function(e) {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      formData.append('template', selectedTemplate);
+
+      // Get template mode
+      const templateMode = document.querySelector('input[name="templateMode"]:checked').value;
+      formData.append('templateMode', templateMode);
+
+      // Format times for display
+      const inTime = formatTime(document.getElementById('inTime').value);
+      const outTime = formatTime(document.getElementById('outTime').value);
+      formData.set('inTime', inTime);
+      formData.set('outTime', outTime);
+
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('result').style.display = 'none';
+      document.getElementById('downloadSection').style.display = 'none';
+
+      try {
+        const res = await fetch('/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!res.ok) throw new Error('Upload failed');
+
+        const data = await res.json();
+        const resultImg = document.getElementById('result');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const downloadSection = document.getElementById('downloadSection');
+
+        resultImg.src = data.imageUrl;
+        resultImg.style.display = 'block';
+        downloadBtn.href = data.imageUrl;
+        downloadSection.style.display = 'block';
+
+        resultImg.scrollIntoView({ behavior: 'smooth' });
+      } catch (error) {
+        alert('Error generating time tracker photo. Please try again.');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
